@@ -11,6 +11,7 @@ namespace Pb304PetShop
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddSession();
 
             builder.Services.AddDbContext<AppDbContext>(options =>
             {
@@ -29,6 +30,7 @@ namespace Pb304PetShop
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseSession();
 
             app.UseRouting();
 

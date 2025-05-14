@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Pb304PetShop.Models;
 
 namespace Pb304PetShop.ViewComponents
 {
@@ -6,7 +7,21 @@ namespace Pb304PetShop.ViewComponents
     {
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            return View();
+            var basket = Request.Cookies["Basket"];
+            var quantity = 0;
+
+            if (!string.IsNullOrEmpty(basket))
+            {
+                var basketItems = Newtonsoft.Json.JsonConvert.DeserializeObject<List<BasketItem>>(basket) ?? [];
+                quantity = basketItems.Sum(x => x.Quantity);
+            }
+
+            var headerViewModel = new HeaderViewModel
+            {
+                Quantity = quantity
+            };
+
+            return View(headerViewModel);
         }
     }
 }

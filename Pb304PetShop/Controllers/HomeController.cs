@@ -27,5 +27,21 @@ namespace Pb304PetShop.Controllers
 
             return View(model);
         }
+
+        public IActionResult Test()
+        {
+            Response.Cookies.Append("Test", "Pb304-New",new CookieOptions { Expires = DateTimeOffset.Now.AddHours(1)});
+
+            HttpContext.Session.SetString("Test-Session", "Pb304-Session");
+
+            return NoContent();
+        }
+
+        public IActionResult Get()
+        {
+            var test = Request.Cookies["Test"];
+            var testSession = HttpContext.Session.GetString("Test-Session");
+            return Json(new { test, testSession });
+        }
     }
 }
