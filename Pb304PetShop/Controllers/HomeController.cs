@@ -18,11 +18,13 @@ namespace Pb304PetShop.Controllers
         {
             var sliders = await _dbContext.Sliders.ToListAsync();
             var products = await _dbContext.Products.Take(6).ToListAsync();
+            var categories = await _dbContext.Categories.ToListAsync();
 
             var model = new HomeViewModel
             {
                 Sliders = sliders,
-                Products = products
+                Products = products,
+                Categories = categories
             };
 
             return View(model);
