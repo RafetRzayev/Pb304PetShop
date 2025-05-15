@@ -22,7 +22,7 @@ namespace Pb304PetShop.ViewComponents
                 return Content("0");
             }
 
-            var basketItems = JsonConvert.DeserializeObject<List<BasketItem>>(basket);
+            var basketItems = JsonConvert.DeserializeObject<List<BasketItemCookieModel>>(basket);
 
             var cart = new CartViewModel();
             var cartItemList = new List<CartItemViewModel>();

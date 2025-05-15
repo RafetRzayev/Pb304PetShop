@@ -12,7 +12,7 @@ namespace Pb304PetShop.ViewComponents
 
             if (!string.IsNullOrEmpty(basket))
             {
-                var basketItems = Newtonsoft.Json.JsonConvert.DeserializeObject<List<BasketItem>>(basket) ?? [];
+                var basketItems = Newtonsoft.Json.JsonConvert.DeserializeObject<List<BasketItemCookieModel>>(basket) ?? [];
                 quantity = basketItems.Sum(x => x.Quantity);
             }
 

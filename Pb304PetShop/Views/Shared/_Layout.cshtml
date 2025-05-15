@@ -128,7 +128,7 @@
                 </ul> *@
                 @await Component.InvokeAsync("Basket")
 
-                <button class="w-100 btn btn-primary btn-lg" type="submit">Continue to checkout</button>
+                <a asp-controller="basket" asp-action="cart" class="w-100 btn btn-primary btn-lg" type="submit">Continue to checkout</a>
             </div>
         </div>
     </div>
