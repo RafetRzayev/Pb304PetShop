@@ -109,7 +109,6 @@ namespace Pb304PetShop.Controllers
             return View(cart);
         }
 
-
         [HttpPost]
         public IActionResult UpdateBasket([FromBody]UpdateModel updateModel)
         {

@@ -18,24 +18,26 @@
 <section id="cart" class="my-5 py-5">
     <div class="container">
         <div class="row g-md-5" id="cartPartial">
-          <partial name="_CartPartialView" model="@cartViewModel"></partial>
+            <partial name="_CartPartialView" model="@cartViewModel"></partial>
         </div>
     </div>
 </section>
 <script>
     function IncrementQuantity(productId) {
         const quantityInput = document.querySelector(`input[name="quantity${productId}"]`);
-        const currentQuantity = parseInt(quantityInput.value) + 1; 
+        const currentQuantity = parseInt(quantityInput.value) + 1;
         const cartPartial = document.getElementById('cartPartial');
         fetch('/Basket/UpdateBasket', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ productId: productId, quantity:currentQuantity })
+            body: JSON.stringify({ productId: productId, quantity: currentQuantity })
         })
         .then(response => response.text())
-        .then(data => {cartPartial.innerHTML = data});
+        .then(data => {
+            cartPartial.innerHTML = data;
+        });
     }
 
     function DecrementQuantity(productId) {
@@ -52,9 +54,26 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ productId: productId, quantity:currentQuantity })
+            body: JSON.stringify({ productId: productId, quantity: currentQuantity })
         })
         .then(response => response.text())
-        .then(data => {cartPartial.innerHTML = data});
+        .then(data => {
+            cartPartial.innerHTML = data;
+        });
+    }
+
+    function Remove(productId) {
+        const cartPartial = document.getElementById('cartPartial');
+        fetch('/Basket/UpdateBasket', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId: productId, quantity: 0 })
+        })
+        .then(response => response.text())
+        .then(data => {
+            cartPartial.innerHTML = data;
+        });
     }
 </script>
