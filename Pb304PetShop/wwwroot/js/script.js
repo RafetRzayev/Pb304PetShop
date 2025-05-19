@@ -1,6 +1,6 @@
-(function($) {
+(function ($) {
 
-  "use strict";
+    "use strict";
 
   var initPreloader = function() {
     $(document).ready(function($) {

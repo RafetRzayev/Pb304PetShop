@@ -128,7 +128,7 @@ namespace Pb304PetShop.Controllers
             var basketJson = JsonConvert.SerializeObject(basket);
             Response.Cookies.Append(BasketCookieKey, basketJson, new CookieOptions
             {
-                Expires = DateTimeOffset.Now.AddHours(1)
+                Expires = DateTimeOffset.Now.AddMonths(1)
             });
 
             var cart = new CartViewModel();
