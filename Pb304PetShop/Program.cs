@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Pb304PetShop.DataContext;
+using Pb304PetShop.DataContext.Entities;
 
 namespace Pb304PetShop
 {
@@ -12,6 +14,23 @@ namespace Pb304PetShop
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddSession();
+
+            builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
+            {
+                options.Password.RequiredLength = 4;
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+
+                //options.Lockout.AllowedForNewUsers = true;
+
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+
+                options.User.RequireUniqueEmail = true;
+
+            }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 
             builder.Services.AddDbContext<AppDbContext>(options =>
             {
