@@ -1,13 +1,16 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Pb304PetShop.Data;
 using Pb304PetShop.DataContext;
 using Pb304PetShop.DataContext.Entities;
+using System.Reflection;
 
 namespace Pb304PetShop
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public async static Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -23,8 +26,6 @@ namespace Pb304PetShop
                 options.Password.RequireUppercase = false;
                 options.Password.RequireNonAlphanumeric = false;
 
-                //options.Lockout.AllowedForNewUsers = true;
-
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
                 options.Lockout.MaxFailedAccessAttempts = 5;
 
@@ -37,13 +38,22 @@ namespace Pb304PetShop
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
             });
 
+            builder.Services.AddScoped<DataInitializer>();
+
+            builder.Services.Configure<SuperAdmin>(builder.Configuration.GetSection("SuperAdmin"));
+
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var dataInitializer = scope.ServiceProvider.GetRequiredService<DataInitializer>();
+                await dataInitializer.SeedData();
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -55,11 +65,16 @@ namespace Pb304PetShop
 
             app.UseAuthorization();
 
+            // Replace UseEndpoints with top-level route registrations
+            app.MapControllerRoute(
+                name: "areas",
+                pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
+
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }

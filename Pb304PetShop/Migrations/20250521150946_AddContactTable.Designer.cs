@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pb304PetShop.DataContext;
 
@@ -11,9 +12,11 @@ using Pb304PetShop.DataContext;
 namespace Pb304PetShop.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250521150946_AddContactTable")]
+    partial class AddContactTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -255,13 +258,6 @@ namespace Pb304PetShop.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Contacts");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 23,
-                            Email = "hellomello"
-                        });
                 });
 
             modelBuilder.Entity("Pb304PetShop.DataContext.Entities.Product", b =>

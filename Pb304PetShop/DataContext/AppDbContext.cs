@@ -14,5 +14,12 @@ namespace Pb304PetShop.DataContext
         public DbSet<Slider> Sliders { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Contact> Contacts { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<Contact>().HasData(new Contact() {Id = 23, Email = "hellomello" });
+            base.OnModelCreating(builder);
+        }
     }
 }
