@@ -1,3 +1,5 @@
+using Mailing;
+using Mailing.MailKitImplementations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -40,6 +42,7 @@ namespace Pb304PetShop
 
             builder.Services.AddScoped<DataInitializer>();
 
+            builder.Services.AddTransient<IMailService, MailKitMailService>();
             builder.Services.Configure<SuperAdmin>(builder.Configuration.GetSection("SuperAdmin"));
 
             var app = builder.Build();
