@@ -18,7 +18,7 @@ namespace Pb304PetShop.Areas.Admin.Extensions
         {
             if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
            
-            var unicalFileName = $"{Path.GetFileNameWithoutExtension(formFile.FileName)}-{Guid.NewGuid()}.{Path.GetExtension(formFile.FileName)}";
+            var unicalFileName = $"{Path.GetFileNameWithoutExtension(formFile.FileName)}-{Guid.NewGuid()}{Path.GetExtension(formFile.FileName)}";
             var filePath = Path.Combine(folderPath, unicalFileName);
 
             var fs = new FileStream(filePath, FileMode.Create);

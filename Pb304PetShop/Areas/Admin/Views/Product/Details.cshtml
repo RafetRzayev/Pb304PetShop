@@ -1,0 +1,17 @@
+﻿@model Product
+
+<h1>@Model.Name</h1>
+<p>@Model.Price</p>
+<p>@Model.Category?.Name</p>
+
+<br />
+<p>Cover image</p>
+<img src="~/images/product/@Model.CoverImageUrl" width="100" height="100"/>
+
+<p>Images</p>
+
+@foreach(var item in Model.Images)
+{
+    <img src="~/images/product/@item.Name" width="100" height="100" />
+}
+

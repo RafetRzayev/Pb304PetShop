@@ -49,6 +49,7 @@ namespace Pb304PetShop
 
 
             FilePathConstants.SliderPath = Path.Combine(builder.Environment.WebRootPath, "images", "slider");
+            FilePathConstants.ProductPath = Path.Combine(builder.Environment.WebRootPath, "images", "product");
 
             var app = builder.Build();
 

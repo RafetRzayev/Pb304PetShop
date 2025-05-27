@@ -1,0 +1,46 @@
+﻿@model ProductCreateViewModel
+<div class="col-12 grid-margin stretch-card">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Create product</h4>
+            <form class="forms-sample" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="exampleInputName1">Name</label>
+                    <input asp-for="Name" class="form-control" id="exampleInputName1" placeholder="Name">
+                </div>
+                <span asp-validation-for="Name" class="text-danger"></span>
+              
+                <div class="form-group">
+                    <label for="exampleInputName1">Price</label>
+                    <input asp-for="Price" class="form-control" id="exampleInputName1" placeholder="Price">
+                </div>
+                <span asp-validation-for="Price" class="text-danger"></span>
+               
+                <div class="form-group">
+                    <label for="exampleInputName1">Category</label>
+                    <select asp-for="CategoryId" asp-items="Model.CategorySelectListItems" class="form-control" id="exampleInputName1" placeholder="Price"></select>
+                </div>
+                <span asp-validation-for="Price" class="text-danger"></span>
+
+                <div class="form-group">
+                    <label>Cover image</label>
+                    <div class="input-group col-xs-12">
+                        <input asp-for="CoverImageFile" class="form-control file-upload-info" placeholder="Upload Image">
+                    </div>
+                    <span asp-validation-for="CoverImageFile" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>Images</label>
+                    <div class="input-group col-xs-12">
+                        <input asp-for="ImagesFiles" class="form-control file-upload-info" placeholder="Upload Image">
+                    </div>
+                    <span asp-validation-for="ImagesFiles" class="text-danger"></span>
+                </div>
+                <div asp-validation-summary="ModelOnly"></div>
+                <button type="submit" class="btn btn-primary mr-2">Submit</button>
+                <a asp-action="index" class="btn btn-light">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

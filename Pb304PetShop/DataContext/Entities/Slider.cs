@@ -9,6 +9,6 @@ namespace Pb304PetShop.DataContext.Entities
         public string? ImageUrl { get; set; }
         public string? Description { get; set; }
         [NotMapped]
-        public required IFormFile ImageFile { get; set; }
+        public IFormFile? ImageFile { get; set; }
     }
 }

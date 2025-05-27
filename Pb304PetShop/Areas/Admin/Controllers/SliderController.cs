@@ -86,5 +86,64 @@ namespace Pb304PetShop.Areas.Admin.Controllers
 
             return Json(removedSlider.Entity);
         }
+
+        public async Task<IActionResult> Update(int id)
+        {
+            var slider = await _dbContext.Sliders.FindAsync(id);
+
+            if (slider == null) return NotFound();
+
+            return View(slider);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Update(Slider slider)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(slider);
+            }
+
+            var existSlider = await _dbContext.Sliders.AsNoTracking().FirstOrDefaultAsync(x => x.Id == slider.Id);
+
+            if (existSlider == null) return NotFound();
+
+            var previusFileName = existSlider.ImageUrl;
+
+            if (slider.ImageFile == null)
+            {
+                slider.ImageUrl = existSlider.ImageUrl;
+            }
+            else
+            {
+                if (!slider.ImageFile.IsImage())
+                {
+                    ModelState.AddModelError("ImageFile", "Sekil secilmelidir!");
+
+                    return View(slider);
+                }
+
+                if (!slider.ImageFile.IsAllowedSize(1))
+                {
+                    ModelState.AddModelError("ImageFile", "Sekil hecmi 1mb-dan cox ola bilmez");
+
+                    return View(slider);
+                }
+
+                var unicalFileName = await slider.ImageFile.GenerateFile(FilePathConstants.SliderPath);
+
+                slider.ImageUrl = unicalFileName;
+            }
+
+            var updatedSlider = _dbContext.Sliders.Update(slider);
+            await _dbContext.SaveChangesAsync();
+
+            if (updatedSlider != null)
+            {
+                System.IO.File.Delete(Path.Combine(FilePathConstants.SliderPath, previusFileName));
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
