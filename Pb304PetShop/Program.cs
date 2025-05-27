@@ -1,8 +1,10 @@
 using Mailing;
 using Mailing.MailKitImplementations;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Pb304PetShop.Areas.Admin.Data;
 using Pb304PetShop.Data;
 using Pb304PetShop.DataContext;
 using Pb304PetShop.DataContext.Entities;
@@ -44,6 +46,9 @@ namespace Pb304PetShop
 
             builder.Services.AddTransient<IMailService, MailKitMailService>();
             builder.Services.Configure<SuperAdmin>(builder.Configuration.GetSection("SuperAdmin"));
+
+
+            FilePathConstants.SliderPath = Path.Combine(builder.Environment.WebRootPath, "images", "slider");
 
             var app = builder.Build();
 

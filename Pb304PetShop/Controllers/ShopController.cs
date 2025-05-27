@@ -44,6 +44,7 @@ namespace Pb304PetShop.Controllers
 
     public class RequestModel
     {
+        public int Id { get; set; }
         public int StartFrom { get; set; }
     }
 }
