@@ -33,7 +33,9 @@ namespace Pb304PetShop
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
                 options.Lockout.MaxFailedAccessAttempts = 5;
 
-                options.User.RequireUniqueEmail = true;
+                //options.User.RequireUniqueEmail = true;
+                
+                options.SignIn.RequireConfirmedEmail = true;
 
             }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 

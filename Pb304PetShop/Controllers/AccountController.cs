@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Pb304PetShop.DataContext.Entities;
 using Pb304PetShop.Models;
 
@@ -52,6 +53,12 @@ namespace Pb304PetShop.Controllers
                 return View();
             }
 
+            var emailConfirmToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var emailConfirmLink = Url.Action("ConfirmEmail", "Account", new { emailConfirmToken, user.UserName }, Request.Scheme, Request.Host.ToString());
+
+            _mailService.SendMail(new Mail { ToEmail = user.Email, Subject = "Email confirmation", TextBody = emailConfirmLink });
+
+
             return RedirectToAction(nameof(Login));
         }
 
@@ -82,6 +89,16 @@ namespace Pb304PetShop.Controllers
             if (result.IsLockedOut)
             {
                 ModelState.AddModelError("", $"You are banned {existUser.LockoutEnd.Value - DateTimeOffset.UtcNow}");
+
+                return View();
+            }
+
+            var isEmailConfirmed = await _userManager.IsEmailConfirmedAsync(existUser);
+            if (!isEmailConfirmed)
+            {
+                ModelState.AddModelError("", "Email not confirmed");
+
+                return View();
             }
 
             if (!result.Succeeded)
@@ -204,6 +221,24 @@ namespace Pb304PetShop.Controllers
                 }
 
                 return View(resetPasswordViewModel);
+            }
+
+            return RedirectToAction(nameof(Login));
+        }
+
+       
+        public async Task<IActionResult> ConfirmEmail(string emailConfirmToken, string username)
+        {
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+                return BadRequest();
+
+            var result = await _userManager.ConfirmEmailAsync(user, emailConfirmToken);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest();
             }
 
             return RedirectToAction(nameof(Login));

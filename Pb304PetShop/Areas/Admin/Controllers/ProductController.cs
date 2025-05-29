@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Pb304PetShop.Areas.Admin.Data;
 using Pb304PetShop.Areas.Admin.Extensions;
+using Pb304PetShop.Controllers;
 using Pb304PetShop.DataContext;
 using Pb304PetShop.DataContext.Entities;
 
@@ -129,5 +130,159 @@ namespace Pb304PetShop.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Delete([FromBody] RequestModel requestModel)
+        {
+            var product = await _dbContext.Products
+                .Include(x => x.Images)
+                .FirstOrDefaultAsync(x => x.Id == requestModel.Id);
+
+            if (product == null) return NotFound();
+
+            var removedProduct = _dbContext.Products.Remove(product);
+            await _dbContext.SaveChangesAsync();
+
+            if (removedProduct != null)
+            {
+                System.IO.File.Delete(Path.Combine(FilePathConstants.ProductPath, product.CoverImageUrl));
+
+                foreach (var item in product.Images)
+                {
+                    System.IO.File.Delete(Path.Combine(FilePathConstants.ProductPath, item.Name));
+                }
+            }
+
+            return Json(removedProduct.Entity);
+        }
+
+        public async Task<IActionResult> Update(int id)
+        {
+            var product = await _dbContext.Products
+                .Include(x => x.Images)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            var categories = await _dbContext.Categories.ToListAsync();
+            var categoryListItems = categories.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToList();
+
+            if (product == null) return NotFound();
+
+            var updateViewModel = new ProductUpdateViewModel
+            {
+                Name = product.Name,
+                CoverImageUrl = product.CoverImageUrl,
+                Price = product.Price,
+                CategoryId = product.CategoryId,
+                CategorySelectListItems = categoryListItems,
+                ImageUrls = product.Images.Select(x => x.Name).ToList()
+            };
+
+            return View(updateViewModel);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Update(ProductUpdateViewModel model)
+        {
+            var categories = await _dbContext.Categories.ToListAsync();
+            var categoryListItems = categories.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToList();
+
+            if (!ModelState.IsValid)
+            {
+                model.CategorySelectListItems = categoryListItems;
+                return View(model);
+            }
+
+            var product = await _dbContext.Products.FindAsync(model.Id);
+
+            if (product == null) return NotFound();
+
+            product.Name = model.Name;
+            product.Price = model.Price;
+            product.CategoryId = model.CategoryId;
+
+
+            if (model.CoverImageFile != null)
+            {
+                if (!model.CoverImageFile.IsImage())
+                {
+                    ModelState.AddModelError("ImageFile", "Sekil secilmelidir!");
+                    model.CategorySelectListItems = categoryListItems;
+
+                    return View(model);
+                }
+
+                if (!model.CoverImageFile.IsAllowedSize(1))
+                {
+                    ModelState.AddModelError("ImageFile", "Sekil hecmi 1mb-dan cox ola bilmez");
+                    model.CategorySelectListItems = categoryListItems;
+
+                    return View(model);
+                }
+
+                var unicalCoverImageFileName = await model.CoverImageFile.GenerateFile(FilePathConstants.ProductPath);
+
+                if (product.CoverImageUrl != null)
+                {
+                    System.IO.File.Delete(Path.Combine(FilePathConstants.ProductPath, product.CoverImageUrl));
+                }
+                       
+                product.CoverImageUrl = unicalCoverImageFileName;
+            }
+
+            bool isValidImages = true;
+
+            foreach (var item in model.ImagesFiles ?? [])
+            {
+                if (!item.IsImage())
+                {
+                    isValidImages = false;
+                    ModelState.AddModelError("", $"{item.FileName}-sekil olmalidir");
+                }
+
+                if (!item.IsAllowedSize(1))
+                {
+                    isValidImages = false;
+                    ModelState.AddModelError("", $"{item.FileName}-hecmi 1 mb-dan cox olmamalidir");
+                }
+            }
+
+            if (!isValidImages)
+            {
+                model.CategorySelectListItems = categoryListItems;
+                return View(model);
+            }
+
+            foreach (var item in model.ImagesFiles ?? [])
+            {
+                var unicalFileName = await item.GenerateFile(FilePathConstants.ProductPath);
+                product.Images.Add(new ProductImage { Name = unicalFileName });
+            }
+
+            _dbContext.Products.Update(product);
+            await _dbContext.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveImage([FromBody] RequestModel requestModel)
+        {
+            if (string.IsNullOrEmpty(requestModel.ImageName)) return BadRequest();
+
+            var productImage = await _dbContext.ProductImages.FirstOrDefaultAsync(x => x.Name == requestModel.ImageName);
+
+            if (productImage == null) return BadRequest();
+
+            var removedImage = _dbContext.ProductImages.Remove(productImage);
+            await _dbContext.SaveChangesAsync();
+
+            if (removedImage != null)
+            {
+                System.IO.File.Delete(Path.Combine(FilePathConstants.ProductPath, requestModel.ImageName));
+            }
+
+            return Json(removedImage.Entity);
+        }
     }
 }
