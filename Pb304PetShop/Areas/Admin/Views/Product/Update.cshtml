@@ -23,12 +23,21 @@
                 <span asp-validation-for="CategoryId" class="text-danger"></span>
 
                 <div class="form-group">
+                    <label for="exampleInputName1">Add new tags</label>
+                    <select asp-for="TagIdList" asp-items="Model.TagSelectListItems" class="form-control" id="tagSelectList" placeholder="Price"></select>
+                </div>
+                <span asp-validation-for="TagIdList" class="text-danger"></span>
+
+                <div class="form-group">
                     <img src="~/images/product/@Model.CoverImageUrl" width="100" height="100"/>
+                    <img id="imagePreview" src="#" alt="Selected Image" style="display:none; width:200px; height:auto; margin-top:10px;" />
+
                     <label>Cover image</label>
                     <div class="input-group col-xs-12">
-                        <input asp-for="CoverImageFile" class="form-control file-upload-info" placeholder="Upload Image">
+                        <input asp-for="CoverImageFile" class="form-control file-upload-info" id="imageUpload" placeholder="Upload Image">
                     </div>
                     <span asp-validation-for="CoverImageFile" class="text-danger"></span>
+
                 </div>
                 
                 <div class="form-group">
@@ -49,16 +58,27 @@
                     <button onclick="Delete('@item', this)">Remove</button>
                 </div>
             }
+
+            @foreach (var item in Model.ProductTags)
+            {
+                <div>
+                    <span>@item.Tag?.Name</span>
+                    <button onclick="Delete(@item.Id, this)">Remove</button>
+                </div>
+            }
+
+
         </div>
     </div>
 </div>
 
 
 <script>
-    function Delete(imageName,button){
-    const url = '/admin/product/removeImage';
+    function Delete(id,button){
+    const selectTagInput = document.getElementById("tagSelectList");
+    const url = '/admin/product/removeTag';
     const data = {
-      imageName: imageName,
+      id: id,
     };
 
     const options = {
@@ -75,10 +95,35 @@
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         button.parentNode.remove();
+        return response.json()
+      })
+      .then(data=>{
+          console.log(data);
+          const option = document.createElement('option');
+          option.value = data.id;
+          option.text = data.name;
+
+          selectTagInput.appendChild(option);
       })
       .catch(error => {
         console.error('Error:', error);
       });
 
     }
+
+    document.getElementById('imageUpload').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const img = document.getElementById('imagePreview');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+
 </script>

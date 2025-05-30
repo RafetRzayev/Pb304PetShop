@@ -16,6 +16,8 @@ namespace Pb304PetShop.DataContext
         public DbSet<Category> Categories { get; set; }
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<ProductTag> ProductTags { get; set; }  
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

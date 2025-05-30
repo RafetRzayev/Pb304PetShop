@@ -33,6 +33,7 @@ namespace Pb304PetShop.Areas.Admin.Controllers
             var product = await _dbContext.Products
                 .Include(x => x.Category)
                 .Include(x => x.Images)
+                .Include(x => x.ProductTags).ThenInclude(x => x.Tag)
                 .SingleOrDefaultAsync(x => x.Id == id);
 
             return View(product);
@@ -42,11 +43,15 @@ namespace Pb304PetShop.Areas.Admin.Controllers
         {
             var categories = await _dbContext.Categories.ToListAsync();
             var categoryListItems = categories.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToList();
-           
+
+            var tags = await _dbContext.Tags.ToListAsync();
+            var tagListItems = tags.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToList();
+
             var productCreateModel = new ProductCreateViewModel
             {
                 Name = "",
                 CategorySelectListItems = categoryListItems,
+                TagSelectListItems = tagListItems,
                 CoverImageFile = null
             };
 
@@ -60,9 +65,14 @@ namespace Pb304PetShop.Areas.Admin.Controllers
             var categories = await _dbContext.Categories.ToListAsync();
             var categoryListItems = categories.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToList();
 
+            var tags = await _dbContext.Tags.ToListAsync();
+            var tagListItems = tags.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToList();
+
             if (!ModelState.IsValid)
             {
                 model.CategorySelectListItems = categoryListItems;
+                model.TagSelectListItems = tagListItems;
+
                 return View(model);
             }
 
@@ -70,6 +80,7 @@ namespace Pb304PetShop.Areas.Admin.Controllers
             {
                 ModelState.AddModelError("ImageFile", "Sekil secilmelidir!");
                 model.CategorySelectListItems = categoryListItems;
+                model.TagSelectListItems = tagListItems;
 
                 return View(model);
             }
@@ -78,6 +89,7 @@ namespace Pb304PetShop.Areas.Admin.Controllers
             {
                 ModelState.AddModelError("ImageFile", "Sekil hecmi 1mb-dan cox ola bilmez");
                 model.CategorySelectListItems = categoryListItems;
+                model.TagSelectListItems = tagListItems;
 
                 return View(model);
             }
@@ -104,6 +116,8 @@ namespace Pb304PetShop.Areas.Admin.Controllers
             if (!isValidImages)
             {
                 model.CategorySelectListItems = categoryListItems;
+                model.TagSelectListItems = tagListItems;
+
                 return View(model);
             }
 
@@ -121,7 +135,8 @@ namespace Pb304PetShop.Areas.Admin.Controllers
                 Price = model.Price,
                 CoverImageUrl = unicalCoverImageFileName,
                 Images = productImages,
-                CategoryId = model.CategoryId
+                CategoryId = model.CategoryId,
+                ProductTags = model.TagIdList.Select(x => new ProductTag { TagId = x }).ToList()
             };
 
             await _dbContext.Products.AddAsync(product);
@@ -159,10 +174,22 @@ namespace Pb304PetShop.Areas.Admin.Controllers
         {
             var product = await _dbContext.Products
                 .Include(x => x.Images)
+                .Include(x => x.ProductTags).ThenInclude(x => x.Tag)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             var categories = await _dbContext.Categories.ToListAsync();
             var categoryListItems = categories.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToList();
+
+            var tags = await _dbContext.Tags.ToListAsync();
+            List<SelectListItem> tagListItems = [];
+
+            foreach (var item in tags)
+            {
+                if (product.ProductTags.Find(x => x.TagId == item.Id) != null)
+                    continue;
+
+                tagListItems.Add(new SelectListItem(item.Name, item.Id.ToString()));
+            }
 
             if (product == null) return NotFound();
 
@@ -173,34 +200,53 @@ namespace Pb304PetShop.Areas.Admin.Controllers
                 Price = product.Price,
                 CategoryId = product.CategoryId,
                 CategorySelectListItems = categoryListItems,
-                ImageUrls = product.Images.Select(x => x.Name).ToList()
+                ImageUrls = product.Images.Select(x => x.Name).ToList(),
+                ProductTags = product.ProductTags,
+                TagSelectListItems = tagListItems,
             };
 
             return View(updateViewModel);
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(ProductUpdateViewModel model)
         {
+            var product = await _dbContext.Products.Include(x => x.ProductTags).FirstOrDefaultAsync(x => x.Id == model.Id);
+
+            if (product == null) return NotFound();
+
             var categories = await _dbContext.Categories.ToListAsync();
             var categoryListItems = categories.Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToList();
+
+            var tags = await _dbContext.Tags.ToListAsync();
+            List<SelectListItem> tagListItems = [];
+
+            foreach (var item in tags)
+            {
+                if (product.ProductTags.Find(x => x.TagId == item.Id) != null)
+                    continue;
+
+                tagListItems.Add(new SelectListItem(item.Name, item.Id.ToString()));
+            }
 
             if (!ModelState.IsValid)
             {
                 model.CategorySelectListItems = categoryListItems;
+                model.TagSelectListItems = tagListItems;
                 return View(model);
             }
-
-            var product = await _dbContext.Products.FindAsync(model.Id);
-
-            if (product == null) return NotFound();
 
             product.Name = model.Name;
             product.Price = model.Price;
             product.CategoryId = model.CategoryId;
 
+            foreach (var item in model.TagIdList)
+            {
+                if (product.ProductTags.Find(x => x.TagId == item) != null) continue;
+                
+                product.ProductTags.Add(new ProductTag { TagId = item });
+            }
 
             if (model.CoverImageFile != null)
             {
@@ -208,6 +254,7 @@ namespace Pb304PetShop.Areas.Admin.Controllers
                 {
                     ModelState.AddModelError("ImageFile", "Sekil secilmelidir!");
                     model.CategorySelectListItems = categoryListItems;
+                    model.TagSelectListItems = tagListItems;
 
                     return View(model);
                 }
@@ -216,6 +263,7 @@ namespace Pb304PetShop.Areas.Admin.Controllers
                 {
                     ModelState.AddModelError("ImageFile", "Sekil hecmi 1mb-dan cox ola bilmez");
                     model.CategorySelectListItems = categoryListItems;
+                    model.TagSelectListItems = tagListItems;
 
                     return View(model);
                 }
@@ -250,6 +298,8 @@ namespace Pb304PetShop.Areas.Admin.Controllers
             if (!isValidImages)
             {
                 model.CategorySelectListItems = categoryListItems;
+                model.TagSelectListItems = tagListItems;
+
                 return View(model);
             }
 
@@ -283,6 +333,24 @@ namespace Pb304PetShop.Areas.Admin.Controllers
             }
 
             return Json(removedImage.Entity);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveTag([FromBody]RequestModel requestModel)
+        {
+            var productTag = await _dbContext.ProductTags
+                .Include(x => x.Tag)
+                .FirstOrDefaultAsync(x=>x.Id == requestModel.Id);
+
+            if (productTag == null) return BadRequest();
+
+            var removedTag = productTag.Tag;
+
+            _dbContext.ProductTags.Remove(productTag);
+
+            await _dbContext.SaveChangesAsync();
+
+            return Json(new {removedTag.Id, removedTag.Name});
         }
     }
 }

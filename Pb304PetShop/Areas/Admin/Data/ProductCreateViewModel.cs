@@ -11,6 +11,8 @@ namespace Pb304PetShop.Areas.Admin.Data
         public decimal Price { get; set; }
         public int CategoryId { get; set; }
         public List<SelectListItem> CategorySelectListItems { get; set; } = [];
+        public List<int> TagIdList { get; set; } = [];
+        public List<SelectListItem> TagSelectListItems { get; set; } = [];
         public IFormFile[]? ImagesFiles { get; set; }
     }
 
@@ -23,7 +25,10 @@ namespace Pb304PetShop.Areas.Admin.Data
         public decimal Price { get; set; }
         public int CategoryId { get; set; }
         public List<SelectListItem> CategorySelectListItems { get; set; } = [];
+        public List<int> TagIdList { get; set; } = [];
+        public List<SelectListItem> TagSelectListItems { get; set; } = [];
         public IFormFile[]? ImagesFiles { get; set; }
         public List<string> ImageUrls { get; set; } = [];
+        public List<ProductTag> ProductTags { get; set; } = [];
     }
 }

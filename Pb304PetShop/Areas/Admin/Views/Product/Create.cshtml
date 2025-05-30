@@ -22,6 +22,12 @@
                 </div>
                 <span asp-validation-for="CategoryId" class="text-danger"></span>
 
+                 <div class="form-group">
+                    <label for="exampleInputName1">Tags</label>
+                    <select asp-for="TagIdList" asp-items="Model.TagSelectListItems" class="form-control" id="exampleInputName1" placeholder="Price"></select>
+                </div>
+                <span asp-validation-for="TagIdList" class="text-danger"></span>
+
                 <div class="form-group">
                     <label>Cover image</label>
                     <div class="input-group col-xs-12">
